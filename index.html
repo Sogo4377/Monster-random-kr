@@ -1,635 +1,798 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ME-R</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-    
     body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #121318;
+      font-family: "Noto Sans KR", system-ui, sans-serif;
+      background: #121318;
       color: #e2e2e9;
       overflow-x: hidden;
     }
 
-    /* 머티리얼 유 디자인 컴포넌트 */
     .m3-card {
-      background-color: #1a1b23;
+      background: #1a1b23;
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease;
     }
 
     .m3-btn {
-      border-radius: 100px;
-      font-weight: 700;
-      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 999px;
+      font-weight: 800;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
     }
 
-    .m3-btn-primary {
-      background-color: #a4f59c;
-      color: #043907;
-    }
-
-    .m3-btn-primary:hover {
-      background-color: #bcffb3;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(164, 245, 156, 0.25);
-    }
-    
-    .m3-btn-primary:active {
-      transform: translateY(1px);
-    }
+    .m3-btn:hover { transform: translateY(-2px); }
+    .m3-btn:active { transform: translateY(1px) scale(0.99); }
+    .m3-btn-primary { background: #a4f59c; color: #043907; }
+    .m3-btn-primary:hover { box-shadow: 0 8px 22px rgba(164, 245, 156, 0.22); }
+    .m3-btn-snack { background: #ffc88a; color: #3a2400; }
+    .m3-btn-snack:hover { box-shadow: 0 8px 22px rgba(255, 200, 138, 0.22); }
 
     .m3-chip {
-      border-radius: 8px;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border-radius: 10px;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     }
 
     .m3-chip.active {
-      background-color: #314b32;
-      color: #a4f59c;
+      background: #314b32;
       border-color: #a4f59c;
+      color: #a4f59c;
     }
 
-    /* 초정밀 스프링/탄성 애니메이션 클래스 */
-    .spring-pop {
-      animation: springPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    #view-track {
+      display: flex;
+      width: 200%;
+      transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1);
+      will-change: transform;
     }
 
+    #view-track > section {
+      flex-shrink: 0;
+      width: 50%;
+    }
+
+    .view-monster { transform: translateX(0); }
+    .view-snack { transform: translateX(-50%); }
+
+    #tab-indicator {
+      transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1), background-color 0.35s ease;
+    }
+
+    .tab-active-monster { color: #a4f59c; }
+    .tab-active-snack { color: #ffc88a; }
+
+    .spring-pop { animation: springPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
     @keyframes springPop {
-      0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
-      70% { transform: scale(1.1) rotate(5deg); }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      0% { opacity: 0; transform: scale(0.65) rotate(-12deg); }
+      70% { transform: scale(1.12) rotate(4deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0); }
     }
 
-    /* 결과 카드가 부드럽게 위로 올라오며 나타나는 연출 */
-    .slide-up-fade {
-      animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    }
-
+    .slide-up-fade { animation: slideUpFade 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
     @keyframes slideUpFade {
-      0% { transform: translateY(30px); opacity: 0; filter: blur(5px); }
-      100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* 동적 회전 링 제어 */
-    .ring-spin-fast {
-      animation: spinRing 0.4s linear infinite;
-    }
-
-    .ring-spin-slow {
-      animation: spinRing 30s linear infinite;
-    }
-
+    .ring-spin-fast { animation: spinRing 0.38s linear infinite; }
+    .ring-spin-slow { animation: spinRing 30s linear infinite; }
     @keyframes spinRing {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
-    /* 확정 순간 터지는 파티클 효과 */
     .particle {
       position: absolute;
+      left: 50%;
+      top: 50%;
       pointer-events: none;
-      border-radius: 50%;
-      animation: explode 0.8s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+      border-radius: 999px;
+      animation: explode 0.75s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
     }
 
     @keyframes explode {
-      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+      from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      to { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
     }
 
-    /* 스크롤바 최적화 */
-    #item-grid-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    #item-grid-list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    #item-grid-list::-webkit-scrollbar-thumb {
-      background: #313341;
-      border-radius: 10px;
-    }
+    .nice-scroll::-webkit-scrollbar { width: 6px; }
+    .nice-scroll::-webkit-scrollbar-track { background: transparent; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: #313341; border-radius: 999px; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-[#a4f59c] selection:text-[#043907]">
-
-  <!-- 상단 헤더 -->
-  <header class="bg-[#121318] sticky top-0 z-50 py-4 px-6 border-b border-[#22232a]">
-    <div class="max-w-md mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <span class="material-icons-round text-[#a4f59c] text-3xl animate-pulse">bolt</span>
-        <h1 class="text-xl font-black text-white tracking-tight">ME-R</h1>
+<body class="min-h-screen flex flex-col selection:bg-[#a4f59c] selection:text-[#043907] pb-24">
+  <header class="sticky top-0 z-50 bg-[#121318] border-b border-[#22232a] px-6 py-4">
+    <div class="mx-auto flex max-w-md items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-icons-round text-3xl text-[#a4f59c] animate-pulse">bolt</span>
+        <h1 class="text-xl font-black tracking-tight text-white">ME-R</h1>
       </div>
+      <button id="sound-toggle" class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-800 bg-[#1a1b23] text-[#a4f59c] transition-transform active:scale-90" title="효과음 켜기/끄기" type="button">
+        <span class="material-icons-round text-xl" id="sound-icon">volume_up</span>
+      </button>
     </div>
   </header>
 
-  <!-- 메인 레이아웃 -->
-  <main class="flex-grow max-w-md w-full mx-auto px-4 py-6 flex flex-col justify-start space-y-6">
-    
-    <!-- 타이틀 영역 -->
-    <div class="text-left px-2">
-      <h2 class="text-2xl font-black text-white leading-tight">지금 마실 몬스터는?</h2>
-      <p class="text-sm text-gray-400 mt-1.5">몬스터를 아주 빠르게 뽑고 아주 쳐 빠르게 드세요!</p>
-    </div>
-
-    <!-- 필터링 칩스 -->
-    <div class="px-2">
-      <div class="flex flex-wrap gap-2">
-        <button onclick="toggleFilter('all')" id="filter-all" class="m3-chip active text-xs px-4 py-2 border border-gray-700 bg-[#1a1b23] text-gray-300">
-          전체
-        </button>
-        <button onclick="toggleFilter('zero')" id="filter-zero" class="m3-chip text-xs px-4 py-2 border border-gray-700 bg-[#1a1b23] text-gray-300 flex items-center">
-          <span class="material-icons-round text-xs mr-1">eco</span> 제로 슈거
-        </button>
-        <button onclick="toggleFilter('fruity')" id="filter-fruity" class="m3-chip text-xs px-4 py-2 border border-gray-700 bg-[#1a1b23] text-gray-300 flex items-center">
-          <span class="material-icons-round text-xs mr-1">forest</span> 과즙/상큼함
-        </button>
-      </div>
-    </div>
-
-    <!-- 메인 추천 카드 -->
-    <div class="m3-card p-6 flex flex-col items-center relative overflow-hidden">
-      
-      <!-- 중심 그래픽 영역 -->
-      <div class="relative w-48 h-48 mb-6 flex items-center justify-center bg-[#13141a] rounded-full border-2 border-gray-800 shadow-inner" id="wheel-container">
-        <!-- 배경 다이내믹 그라디언트 글로우 -->
-        <div id="dynamic-radial" class="absolute inset-0 rounded-full opacity-10 transition-all duration-1000" style="background: radial-gradient(circle, #a4f59c 0%, transparent 75%);"></div>
-        
-        <div class="z-10 text-center select-none">
-          <span id="display-emoji" class="text-5xl block mb-2 transform transition-transform duration-100">🥫</span>
-          <span id="display-sub" class="text-[11px] font-bold text-gray-500 tracking-wider block transition-colors duration-300">준비됨</span>
-          <h3 id="display-name" class="text-lg font-black text-white mt-1 px-4 truncate max-w-[170px] transition-colors duration-300">룰렛 시작하기</h3>
+  <main class="flex-grow overflow-hidden">
+    <div class="mx-auto max-w-md overflow-hidden">
+      <div id="view-track" class="view-monster">
+      <section class="flex flex-col justify-start gap-6 px-4 py-6">
+        <div class="px-2 text-left">
+          <h2 class="text-2xl font-black leading-tight text-white">지금 마실 몬스터는?</h2>
+          <p class="mt-1.5 text-sm text-gray-400">몬스터를 빠르게 뽑고, 잘 어울리는 과자까지 함께 추천해요.</p>
         </div>
 
-        <!-- 데코레이션 링 (상태에 따라 도는 속도가 달라짐) -->
-        <div id="deco-ring" class="absolute inset-3 border border-dashed border-gray-800 rounded-full ring-spin-slow"></div>
-      </div>
-
-      <!-- 추천 결과 카드 (부드럽게 페이드 및 슬라이드업) -->
-      <div id="result-container" class="w-full space-y-4 hidden opacity-0">
-        <div class="bg-[#121318] p-4 rounded-2xl border border-gray-800 transition-all duration-300">
-          <div class="flex justify-between items-center mb-2.5">
-            <span id="res-tag" class="text-xs font-bold px-3 py-1.5 rounded-full transition-all duration-300">오리지널</span>
-            <span id="res-calories" class="text-xs text-gray-400 bg-[#1a1b23] px-2.5 py-1 rounded-lg">168 kcal</span>
+        <div class="px-2">
+          <div class="flex flex-wrap gap-2">
+            <button data-filter="all" id="filter-all" class="m3-chip active border px-4 py-2 text-xs font-bold" type="button">전체</button>
+            <button data-filter="zero" id="filter-zero" class="m3-chip flex items-center border border-gray-700 bg-[#1a1b23] px-4 py-2 text-xs font-bold text-gray-300" type="button">
+              <span class="material-icons-round mr-1 text-xs">eco</span> 제로 슈거
+            </button>
+            <button data-filter="fruity" id="filter-fruity" class="m3-chip flex items-center border border-gray-700 bg-[#1a1b23] px-4 py-2 text-xs font-bold text-gray-300" type="button">
+              <span class="material-icons-round mr-1 text-xs">forest</span> 과일향
+            </button>
           </div>
-          <p id="res-desc" class="text-xs text-gray-300 leading-relaxed transition-all duration-300"></p>
         </div>
 
-        <!-- 재고 부족 대비 추천 -->
-        <div class="bg-[#2a201b] border border-[#ffb4ab]/10 p-4 rounded-2xl transition-all duration-300">
-          <div class="flex items-center space-x-2 text-[#ffb4ab] mb-2">
-            <span class="material-icons-round text-sm">running_with_errors</span>
-            <h4 class="text-xs font-bold">제품이 없나요?</h4>
-          </div>
-          <p class="text-[11px] text-[#ffdad6] mb-3">비슷한 맛을 추천 해드릴게요!</p>
-          
-          <div id="backup-item" class="bg-[#1a1b23]/80 p-3 rounded-xl flex items-center justify-between border border-gray-800 hover:border-gray-500 transition-all duration-300 cursor-pointer active:scale-[0.98]">
-            <div class="flex items-center space-x-2">
-              <span id="backup-emoji" class="text-lg">⚪</span>
-              <div>
-                <p id="backup-name" class="text-xs font-bold text-white"></p>
-                <p id="backup-tag" class="text-[10px] text-gray-500"></p>
-              </div>
+        <div class="m3-card relative flex flex-col items-center overflow-hidden p-6">
+          <div id="wheel-container" class="relative mb-6 flex h-48 w-48 items-center justify-center rounded-full border-2 border-gray-800 bg-[#13141a] shadow-inner">
+            <div id="dynamic-radial" class="absolute inset-0 rounded-full opacity-10 transition-all duration-1000" style="background: radial-gradient(circle, #a4f59c 0%, transparent 75%);"></div>
+            <div class="z-10 select-none text-center">
+              <span id="display-emoji" class="mb-2 block text-5xl transition-transform duration-100">⚡</span>
+              <span id="display-sub" class="block text-[11px] font-bold tracking-wider text-gray-500">준비 완료</span>
+              <h3 id="display-name" class="mt-1 max-w-[170px] truncate px-4 text-lg font-black text-white">룰렛 시작하기</h3>
             </div>
-            <span class="material-icons-round text-gray-500 text-sm">arrow_forward_ios</span>
+            <div id="deco-ring" class="ring-spin-slow absolute inset-3 rounded-full border border-dashed border-gray-800"></div>
+          </div>
+
+          <div id="result-container" class="hidden w-full space-y-4 opacity-0">
+            <div class="rounded-2xl border border-gray-800 bg-[#121318] p-4">
+              <div class="mb-2.5 flex items-center justify-between gap-3">
+                <span id="res-tag" class="rounded-full px-3 py-1.5 text-xs font-bold">추천</span>
+                <span id="res-calories" class="rounded-lg bg-[#1a1b23] px-2.5 py-1 text-xs text-gray-400">- kcal</span>
+              </div>
+              <p id="res-desc" class="text-xs leading-relaxed text-gray-300"></p>
+            </div>
+
+            <div class="rounded-2xl border border-[#ffc88a]/15 bg-[#241f17] p-4">
+              <div class="mb-2 flex items-center gap-2 text-[#ffc88a]">
+                <span class="material-icons-round text-sm">bakery_dining</span>
+                <h4 class="text-xs font-bold">이 맛에 어울리는 과자</h4>
+              </div>
+              <p class="mb-3 text-[11px] text-[#ffe5c2]">선택한 몬스터와 잘 맞는 간식이에요.</p>
+              <button id="pair-snack" class="flex w-full items-center justify-between rounded-xl border border-gray-800 bg-[#1a1b23]/80 p-3 text-left transition hover:border-[#ffc88a]/50 active:scale-[0.98]" type="button">
+                <span class="flex items-center gap-2">
+                  <span id="pair-emoji" class="text-lg">🍪</span>
+                  <span>
+                    <span id="pair-name" class="block text-xs font-bold text-white"></span>
+                    <span id="pair-reason" class="block text-[10px] text-gray-500"></span>
+                  </span>
+                </span>
+                <span class="material-icons-round text-sm text-[#ffc88a]">arrow_forward_ios</span>
+              </button>
+            </div>
+
+            <div class="rounded-2xl border border-[#ffb4ab]/10 bg-[#2a201b] p-4">
+              <div class="mb-2 flex items-center gap-2 text-[#ffb4ab]">
+                <span class="material-icons-round text-sm">running_with_errors</span>
+                <h4 class="text-xs font-bold">품절이라면?</h4>
+              </div>
+              <p class="mb-3 text-[11px] text-[#ffdad6]">비슷한 무드의 대체 제품을 추천해드릴게요.</p>
+              <button id="backup-item" class="flex w-full items-center justify-between rounded-xl border border-gray-800 bg-[#1a1b23]/80 p-3 text-left transition hover:border-gray-500 active:scale-[0.98]" type="button">
+                <span class="flex items-center gap-2">
+                  <span id="backup-emoji" class="text-lg">🥤</span>
+                  <span>
+                    <span id="backup-name" class="block text-xs font-bold text-white"></span>
+                    <span id="backup-tag" class="block text-[10px] text-gray-500"></span>
+                  </span>
+                </span>
+                <span class="material-icons-round text-sm text-gray-500">arrow_forward_ios</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="pick-btn" class="m3-btn m3-btn-primary mt-6 flex w-full items-center justify-center gap-2 py-4" type="button">
+            <span class="material-icons-round text-xl">casino</span>
+            <span>RoLL It!</span>
+          </button>
+        </div>
+
+        <div class="m3-card p-5">
+          <button id="collapse-trigger" class="flex w-full select-none items-center justify-between text-left" type="button">
+            <span class="flex items-center gap-2">
+              <span class="material-icons-round text-[#a4f59c]">format_list_bulleted</span>
+              <span class="text-sm font-bold text-white">등록된 제품 목록 (<span id="count-span">0</span>)</span>
+            </span>
+            <span id="collapse-arrow" class="material-icons-round text-gray-400 transition-transform duration-300">expand_more</span>
+          </button>
+          <div id="list-container" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+            <div id="item-grid-list" class="nice-scroll mt-4 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto pr-1"></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 작동 버튼 -->
-      <button id="pick-btn" class="m3-btn m3-btn-primary w-full py-4 mt-6 flex items-center justify-center space-x-2 active:scale-[0.98] cursor-pointer">
-        <span class="material-icons-round text-xl">casino</span>
-        <span>RoLL It!</span>
-      </button>
-
-    </div>
-
-    <!-- 전체 라인업 목록 (스크롤 문제 완벽 해결 버전) -->
-    <div class="m3-card p-5">
-      <div class="flex justify-between items-center cursor-pointer select-none" id="collapse-trigger">
-        <div class="flex items-center space-x-2">
-          <span class="material-icons-round text-[#a4f59c]">format_list_bulleted</span>
-          <span class="text-sm font-bold text-white">등록된 제품 목록 (<span id="count-span">0</span>)</span>
+      <section class="flex flex-col justify-start gap-6 px-4 py-6">
+        <div class="px-2 text-left">
+          <h2 class="text-2xl font-black leading-tight text-white">어떤 과자를 먹을까?</h2>
+          <p class="mt-1.5 text-sm text-gray-400">몬스터와 곁들이기 좋은 과자를 룰렛으로 골라보세요.</p>
         </div>
-        <span class="material-icons-round text-gray-400 transition-transform duration-300" id="collapse-arrow">expand_more</span>
-      </div>
 
-      <!-- 아코디언 컨테이너: 부드러운 스크롤 처리 -->
-      <div id="list-container" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
-        <div class="grid grid-cols-1 gap-2 mt-4 max-h-72 overflow-y-auto pr-1" id="item-grid-list">
-          <!-- 스크립트 동적 주입 -->
+        <div class="px-2">
+          <div class="flex flex-wrap gap-2">
+            <button data-snack-filter="all" id="sfilter-all" class="m3-chip active border px-4 py-2 text-xs font-bold" type="button">전체</button>
+            <button data-snack-filter="salty" id="sfilter-salty" class="m3-chip flex items-center border border-gray-700 bg-[#1a1b23] px-4 py-2 text-xs font-bold text-gray-300" type="button">
+              <span class="material-icons-round mr-1 text-xs">grain</span> 짭짤한 맛
+            </button>
+            <button data-snack-filter="sweet" id="sfilter-sweet" class="m3-chip flex items-center border border-gray-700 bg-[#1a1b23] px-4 py-2 text-xs font-bold text-gray-300" type="button">
+              <span class="material-icons-round mr-1 text-xs">cake</span> 달콤한 맛
+            </button>
+          </div>
         </div>
+
+        <div class="m3-card relative flex flex-col items-center overflow-hidden p-6">
+          <div id="snack-wheel-container" class="relative mb-6 flex h-48 w-48 items-center justify-center rounded-full border-2 border-gray-800 bg-[#13141a] shadow-inner">
+            <div id="snack-radial" class="absolute inset-0 rounded-full opacity-10 transition-all duration-1000" style="background: radial-gradient(circle, #ffc88a 0%, transparent 75%);"></div>
+            <div class="z-10 select-none text-center">
+              <span id="s-display-emoji" class="mb-2 block text-5xl transition-transform duration-100">🍿</span>
+              <span id="s-display-sub" class="block text-[11px] font-bold tracking-wider text-gray-500">준비 완료</span>
+              <h3 id="s-display-name" class="mt-1 max-w-[170px] truncate px-4 text-lg font-black text-white">과자 뽑기</h3>
+            </div>
+            <div id="snack-deco-ring" class="ring-spin-slow absolute inset-3 rounded-full border border-dashed border-gray-800"></div>
+          </div>
+
+          <div id="snack-result-container" class="hidden w-full space-y-4 opacity-0">
+            <div class="rounded-2xl border border-gray-800 bg-[#121318] p-4">
+              <div class="mb-2.5 flex items-center justify-between gap-3">
+                <span id="s-res-tag" class="rounded-full px-3 py-1.5 text-xs font-bold">추천</span>
+                <span id="s-res-cal" class="rounded-lg bg-[#1a1b23] px-2.5 py-1 text-xs text-gray-400">- kcal</span>
+              </div>
+              <p id="s-res-desc" class="text-xs leading-relaxed text-gray-300"></p>
+            </div>
+
+            <div class="rounded-2xl border border-[#a4f59c]/15 bg-[#13231a] p-4">
+              <div class="mb-2 flex items-center gap-2 text-[#a4f59c]">
+                <span class="material-icons-round text-sm">local_drink</span>
+                <h4 class="text-xs font-bold">이 과자와 어울리는 몬스터</h4>
+              </div>
+              <button id="snack-pair-monster" class="flex w-full items-center justify-between rounded-xl border border-gray-800 bg-[#1a1b23]/80 p-3 text-left transition hover:border-[#a4f59c]/50 active:scale-[0.98]" type="button">
+                <span class="flex items-center gap-2">
+                  <span id="snack-pair-emoji" class="text-lg">🥤</span>
+                  <span>
+                    <span id="snack-pair-name" class="block text-xs font-bold text-white"></span>
+                    <span id="snack-pair-tag" class="block text-[10px] text-gray-500"></span>
+                  </span>
+                </span>
+                <span class="material-icons-round text-sm text-[#a4f59c]">arrow_forward_ios</span>
+              </button>
+            </div>
+          </div>
+
+          <button id="snack-pick-btn" class="m3-btn m3-btn-snack mt-6 flex w-full items-center justify-center gap-2 py-4" type="button">
+            <span class="material-icons-round text-xl">casino</span>
+            <span>과자 뽑기!</span>
+          </button>
+        </div>
+
+        <div class="m3-card p-5">
+          <button id="snack-collapse-trigger" class="flex w-full select-none items-center justify-between text-left" type="button">
+            <span class="flex items-center gap-2">
+              <span class="material-icons-round text-[#ffc88a]">format_list_bulleted</span>
+              <span class="text-sm font-bold text-white">등록된 과자 목록 (<span id="snack-count-span">0</span>)</span>
+            </span>
+            <span id="snack-collapse-arrow" class="material-icons-round text-gray-400 transition-transform duration-300">expand_more</span>
+          </button>
+          <div id="snack-list-container" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+            <div id="snack-grid-list" class="nice-scroll mt-4 grid max-h-72 grid-cols-1 gap-2 overflow-y-auto pr-1"></div>
+          </div>
+        </div>
+      </section>
       </div>
     </div>
-
   </main>
 
-  <!-- 하단 영역 -->
-  <footer class="py-6 text-center text-[11px] text-gray-600 bg-[#121318]">
-    <p>Made by JTY</p>
-  </footer>
+  <nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-[#22232a] bg-[#16171d]/95 backdrop-blur">
+    <div class="relative mx-auto flex max-w-md">
+      <div id="tab-indicator" class="absolute left-0 top-0 h-1 w-1/2 rounded-full bg-[#a4f59c]"></div>
+      <button id="tab-monster" class="tab-active-monster flex flex-1 flex-col items-center gap-0.5 py-3" type="button">
+        <span class="material-icons-round text-2xl">bolt</span>
+        <span class="text-[11px] font-bold">몬스터</span>
+      </button>
+      <button id="tab-snack" class="flex flex-1 flex-col items-center gap-0.5 py-3 text-gray-500" type="button">
+        <span class="material-icons-round text-2xl">cookie</span>
+        <span class="text-[11px] font-bold">과자</span>
+      </button>
+    </div>
+  </nav>
 
-  <!-- 알림 토스트 (스프링 슬라이드 인) -->
-  <div id="m3-snackbar" class="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:max-w-xs bg-[#2e3038] text-[#e2e2e9] py-3.5 px-5 rounded-2xl shadow-2xl flex items-center justify-between text-xs transform translate-y-24 opacity-0 transition-all duration-300 z-50">
-    <div class="flex items-center space-x-2">
+  <div id="m3-snackbar" class="fixed bottom-24 left-4 right-4 z-50 flex translate-y-24 items-center justify-between rounded-2xl bg-[#2e3038] px-5 py-3.5 text-xs text-[#e2e2e9] opacity-0 shadow-2xl transition-all duration-300 md:left-auto md:right-6 md:max-w-xs">
+    <div class="flex items-center gap-2">
       <span class="material-icons-round text-[#a4f59c]">check_circle</span>
       <span id="snackbar-text">준비되었습니다.</span>
     </div>
-    <button onclick="hideSnackbar()" class="text-[#a4f59c] font-bold ml-3 cursor-pointer">닫기</button>
+    <button id="snackbar-close" class="ml-3 font-bold text-[#a4f59c]" type="button">닫기</button>
   </div>
 
-  <!-- 스크립트 핵심 로직 -->
   <script>
     const db = [
-      {
-        id: "original",
-        name: "오리지널",
-        color: "#39ff14",
-        secondaryColor: "#043907",
-        calories: "168 kcal",
-        emoji: "💚",
-        tag: "오리지널 시그니처",
-        desc: "묵직하고 짜릿한 단맛과 탄산, 높은 타우린과 고카페인이 들어간 대표 오리지널 음료입니다.",
-        isZero: false,
-        isFruity: false,
-        backupId: "zero_sugar"
-      },
-      {
-        id: "ultra",
-        name: "울트라",
-        color: "#f0f0f0",
-        secondaryColor: "#111111",
-        calories: "14 kcal",
-        emoji: "🤍",
-        tag: "가벼운 레몬 시트러스",
-        desc: "부드럽고 시원하게 톡 쏘는 레몬필과 감귤향이 들어있어, 부담 없이 가볍게 에너지를 충전할 수 있는 베스트셀러 무설탕 음료입니다.",
-        isZero: true,
-        isFruity: true,
-        backupId: "ultra_citra"
-      },
-      {
-        id: "ultra_citra",
-        name: "울트라 시트라",
-        color: "#fff500",
-        secondaryColor: "#212100",
-        calories: "11 kcal",
-        emoji: "🍋",
-        tag: "상큼하고 가벼운 라임",
-        desc: "레몬과 시원한 라임 과일 풍미가 강조되어, 상큼하고 가벼운 목넘김을 자랑하는 무설탕 음료입니다.",
-        isZero: true,
-        isFruity: true,
-        backupId: "ultra"
-      },
-      {
-        id: "pipeline",
-        name: "파이프라인 펀치",
-        color: "#ff5277",
-        secondaryColor: "#3d0011",
-        calories: "150 kcal",
-        emoji: "🥊",
-        tag: "달콤한 열대 과즙",
-        desc: "상큼하고 달콤한 패션후르츠, 오렌지, 구아바 풍미가 기분 좋게 믹스된 대표 과즙 라인업입니다.",
-        isZero: false,
-        isFruity: true,
-        backupId: "mango_loco"
-      },
-      {
-        id: "mango_loco",
-        name: "망고 로코",
-        color: "#ffa200",
-        secondaryColor: "#382000",
-        calories: "175 kcal",
-        emoji: "🥭",
-        tag: "진한 망고 과즙",
-        desc: "달콤하고 부드러운 진짜 망고 퓨레 풍미와 짜릿한 에너지를 가득 느낄 수 있는 달콤한 탄산음료입니다.",
-        isZero: false,
-        isFruity: true,
-        backupId: "pipeline"
-      },
-      {
-        id: "ultra_paradise",
-        name: "울트라 파라다이스",
-        color: "#00f5bc",
-        secondaryColor: "#00382a",
-        calories: "14 kcal",
-        emoji: "🥝",
-        tag: "청량한 키위 멜론",
-        desc: "시원한 청량감을 자랑하는 잘 익은 키위와 멜론 계열 향이 감돌아 상쾌하게 기분 전환을 돕는 제로 칼로리 음료입니다.",
-        isZero: true,
-        isFruity: true,
-        backupId: "ultra_citra"
-      },
-      {
-        id: "zero_sugar",
-        name: "제로 슈거",
-        color: "#00b4d8",
-        secondaryColor: "#002a35",
-        calories: "16 kcal",
-        emoji: "💙",
-        tag: "오리지널 구현 제로",
-        desc: "오리지널 몬스터 특유의 진한 풍미와 에너지는 고스란히 간직한 채 칼로리 부담만 제로 수준으로 뺀 캔입니다.",
-        isZero: true,
-        isFruity: false,
-        backupId: "original"
-      },
-      {
-        id: "sunrise",
-        name: "울트라 선라이즈",
-        color: "#ffaa00",
-        secondaryColor: "#2d1600",
-        calories: "10 kcal",
-        emoji: "🍊",
-        tag: "가벼운 귤 오렌지",
-        desc: "맑고 가벼운 귤 오렌지 에센스 풍미로, 아침 시간대에도 깔끔하게 즐기기 좋은 가벼운 제로 제품입니다.",
-        isZero: true,
-        isFruity: true,
-        backupId: "peach_keen"
-      },
-      {
-        id: "peach_keen",
-        name: "피치 킨",
-        color: "#ff9f89",
-        secondaryColor: "#3d1000",
-        calories: "12 kcal",
-        emoji: "🍑",
-        tag: "진한 복숭아 향",
-        desc: "풍성하게 차오르는 잘 익은 복숭아 과일향이 달달하게 입안을 감싸는 신규 무설탕 제로 라인업입니다.",
-        isZero: true,
-        isFruity: true,
-        backupId: "sunrise"
-      }
+      { id: "original", name: "오리지널", color: "#39ff14", calories: "168 kcal", emoji: "🥤", tag: "진한 에너지", desc: "묵직하고 톡 쏘는 단맛과 강한 탄산이 있는 클래식 몬스터입니다.", isZero: false, isFruity: false, backupId: "zero_sugar", snackId: "corn_chip" },
+      { id: "ultra", name: "울트라", color: "#f0f0f0", calories: "14 kcal", emoji: "🤍", tag: "가벼운 제로", desc: "부담 없이 산뜻하게 마시기 좋은 화이트 제로 라인입니다.", isZero: true, isFruity: true, backupId: "ultra_citra", snackId: "pretzel" },
+      { id: "ultra_citra", name: "울트라 시트라", color: "#fff500", calories: "11 kcal", emoji: "🍋", tag: "상큼한 라임", desc: "레몬과 라임 느낌이 살아 있는 가볍고 상큼한 제로 제품입니다.", isZero: true, isFruity: true, backupId: "ultra", snackId: "nacho" },
+      { id: "pipeline", name: "파이프라인 펀치", color: "#ff5277", calories: "150 kcal", emoji: "🌺", tag: "달콤한 열대 과일", desc: "패션프루트, 오렌지, 구아바 풍미가 어우러진 과일향 라인입니다.", isZero: false, isFruity: true, backupId: "mango_loco", snackId: "fruit_gummy" },
+      { id: "mango_loco", name: "망고 로코", color: "#ffa200", calories: "175 kcal", emoji: "🥭", tag: "진한 망고", desc: "망고의 진한 단맛과 탄산이 만나 디저트처럼 즐기기 좋은 제품입니다.", isZero: false, isFruity: true, backupId: "pipeline", snackId: "choco_cookie" },
+      { id: "ultra_paradise", name: "울트라 파라다이스", color: "#00f5bc", calories: "14 kcal", emoji: "🥝", tag: "청량한 열대 과일", desc: "키위와 멜론 계열의 산뜻함이 느껴지는 제로 칼로리 라인입니다.", isZero: true, isFruity: true, backupId: "ultra_citra", snackId: "rice_cracker" },
+      { id: "zero_sugar", name: "제로 슈거", color: "#00b4d8", calories: "16 kcal", emoji: "🧊", tag: "오리지널 느낌의 제로", desc: "오리지널의 에너지감은 살리고 당 부담을 줄인 제품입니다.", isZero: true, isFruity: false, backupId: "original", snackId: "potato_chip" },
+      { id: "sunrise", name: "울트라 선라이즈", color: "#ffaa00", calories: "10 kcal", emoji: "🍊", tag: "가벼운 오렌지", desc: "맑고 가벼운 오렌지 풍미라 아침에도 잘 어울리는 제품입니다.", isZero: true, isFruity: true, backupId: "peach_keen", snackId: "butter_waffle" },
+      { id: "peach_keen", name: "피치 킨", color: "#ff9f89", calories: "12 kcal", emoji: "🍑", tag: "진한 복숭아", desc: "복숭아의 달콤한 향을 산뜻하게 즐길 수 있는 제로 라인입니다.", isZero: true, isFruity: true, backupId: "sunrise", snackId: "peach_gummy" }
     ];
 
-    let activeFilter = 'all';
+    const snackDb = [
+      { id: "corn_chip", name: "콘칩", color: "#ffd24a", calories: "약 280 kcal", emoji: "🌽", taste: "고소하고 짭짤함", desc: "고소한 옥수수 향과 바삭함이 오리지널의 진한 맛을 잘 받쳐줘요.", isSalty: true, isSweet: false, monsterId: "original" },
+      { id: "pretzel", name: "프레첼", color: "#caa15a", calories: "약 110 kcal", emoji: "🥨", taste: "담백하고 짭짤함", desc: "가벼운 짠맛이 울트라의 산뜻함을 깔끔하게 살려줘요.", isSalty: true, isSweet: false, monsterId: "ultra" },
+      { id: "nacho", name: "나초", color: "#ffb347", calories: "약 300 kcal", emoji: "🧀", taste: "치즈와 매콤함", desc: "치즈 풍미와 라임 계열의 산미가 만나 입맛을 확 살려줘요.", isSalty: true, isSweet: false, monsterId: "ultra_citra" },
+      { id: "fruit_gummy", name: "열대 과일 젤리", color: "#ff6f91", calories: "약 130 kcal", emoji: "🍬", taste: "새콤달콤함", desc: "과일 젤리가 파이프라인 펀치의 열대 과일 무드를 더 크게 만들어줘요.", isSalty: false, isSweet: true, monsterId: "pipeline" },
+      { id: "choco_cookie", name: "초코칩 쿠키", color: "#8b5a2b", calories: "약 160 kcal", emoji: "🍪", taste: "진하고 달콤함", desc: "초콜릿의 묵직함이 망고 로코의 달콤함과 디저트처럼 어울려요.", isSalty: false, isSweet: true, monsterId: "mango_loco" },
+      { id: "rice_cracker", name: "쌀 크래커", color: "#d9c79e", calories: "약 90 kcal", emoji: "🍘", taste: "담백하고 고소함", desc: "담백한 크래커가 울트라 파라다이스의 청량함을 깔끔하게 마무리해요.", isSalty: true, isSweet: false, monsterId: "ultra_paradise" },
+      { id: "potato_chip", name: "감자칩", color: "#f4d35e", calories: "약 270 kcal", emoji: "🥔", taste: "짭짤하고 바삭함", desc: "소금기 있는 감자칩이 제로 슈거의 탄산감과 경쾌하게 맞아요.", isSalty: true, isSweet: false, monsterId: "zero_sugar" },
+      { id: "butter_waffle", name: "버터 와플", color: "#e0a458", calories: "약 140 kcal", emoji: "🧇", taste: "고소하고 달콤함", desc: "버터 향과 오렌지 풍미가 만나 부드러운 간식 조합이 됩니다.", isSalty: false, isSweet: true, monsterId: "sunrise" },
+      { id: "peach_gummy", name: "복숭아 젤리", color: "#ffb3a7", calories: "약 120 kcal", emoji: "🍑", taste: "향긋하고 달콤함", desc: "복숭아 젤리가 피치 킨의 향을 더 또렷하게 이어줘요.", isSalty: false, isSweet: true, monsterId: "peach_keen" }
+    ];
+
+    let activeFilter = "all";
+    let activeSnackFilter = "all";
     let isRolling = false;
+    let isSnackRolling = false;
     let listOpen = false;
+    let snackListOpen = false;
+    let currentView = "monster";
+    let soundOn = true;
+    let audioCtx = null;
+    let snackTimeout = null;
 
-    // DOM 캐싱
-    const displayEmoji = document.getElementById('display-emoji');
-    const displayName = document.getElementById('display-name');
-    const displaySub = document.getElementById('display-sub');
-    const dynamicRadial = document.getElementById('dynamic-radial');
-    const decoRing = document.getElementById('deco-ring');
-    const wheelContainer = document.getElementById('wheel-container');
-    
-    const resultContainer = document.getElementById('result-container');
-    const resTag = document.getElementById('res-tag');
-    const resCalories = document.getElementById('res-calories');
-    const resDesc = document.getElementById('res-desc');
-    
-    const backupItem = document.getElementById('backup-item');
-    const backupEmoji = document.getElementById('backup-emoji');
-    const backupName = document.getElementById('backup-name');
-    const backupTag = document.getElementById('backup-tag');
-    
-    const pickBtn = document.getElementById('pick-btn');
-    const collapseTrigger = document.getElementById('collapse-trigger');
-    const collapseArrow = document.getElementById('collapse-arrow');
-    const listContainer = document.getElementById('list-container');
-    const itemGridList = document.getElementById('item-grid-list');
-    const countSpan = document.getElementById('count-span');
-    const snackbar = document.getElementById('m3-snackbar');
-    const snackbarText = document.getElementById('snackbar-text');
+    const $ = (id) => document.getElementById(id);
+    const displayEmoji = $("display-emoji");
+    const displayName = $("display-name");
+    const displaySub = $("display-sub");
+    const dynamicRadial = $("dynamic-radial");
+    const decoRing = $("deco-ring");
+    const wheelContainer = $("wheel-container");
+    const resultContainer = $("result-container");
+    const resTag = $("res-tag");
+    const resCalories = $("res-calories");
+    const resDesc = $("res-desc");
+    const backupItem = $("backup-item");
+    const backupEmoji = $("backup-emoji");
+    const backupName = $("backup-name");
+    const backupTag = $("backup-tag");
+    const pairSnack = $("pair-snack");
+    const pairEmoji = $("pair-emoji");
+    const pairName = $("pair-name");
+    const pairReason = $("pair-reason");
+    const pickBtn = $("pick-btn");
+    const collapseTrigger = $("collapse-trigger");
+    const collapseArrow = $("collapse-arrow");
+    const listContainer = $("list-container");
+    const itemGridList = $("item-grid-list");
+    const countSpan = $("count-span");
 
-    // 초기설정
-    countSpan.textContent = db.length;
-    renderAllItems();
+    const sEmoji = $("s-display-emoji");
+    const sName = $("s-display-name");
+    const sSub = $("s-display-sub");
+    const snackRadial = $("snack-radial");
+    const snackDecoRing = $("snack-deco-ring");
+    const snackWheel = $("snack-wheel-container");
+    const snackResult = $("snack-result-container");
+    const sResTag = $("s-res-tag");
+    const sResCal = $("s-res-cal");
+    const sResDesc = $("s-res-desc");
+    const snackPairMonster = $("snack-pair-monster");
+    const snackPairEmoji = $("snack-pair-emoji");
+    const snackPairName = $("snack-pair-name");
+    const snackPairTag = $("snack-pair-tag");
+    const snackPickBtn = $("snack-pick-btn");
+    const snackCollapseTrigger = $("snack-collapse-trigger");
+    const snackCollapseArrow = $("snack-collapse-arrow");
+    const snackListContainer = $("snack-list-container");
+    const snackGridList = $("snack-grid-list");
+    const snackCountSpan = $("snack-count-span");
+
+    const snackbar = $("m3-snackbar");
+    const snackbarText = $("snackbar-text");
+    const viewTrack = $("view-track");
+    const tabIndicator = $("tab-indicator");
+    const tabMonster = $("tab-monster");
+    const tabSnack = $("tab-snack");
+
+    function ensureAudio() {
+      if (!soundOn) return null;
+      if (!audioCtx) {
+        const AudioConstructor = window.AudioContext || window.webkitAudioContext;
+        if (AudioConstructor) audioCtx = new AudioConstructor();
+      }
+      if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTone(freq, dur = 0.06, type = "square", vol = 0.1) {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + dur);
+    }
+
+    function playClick() { playTone(660, 0.05, "sine", 0.08); }
+    function playTick() { playTone(420 + Math.random() * 180, 0.045, "square", 0.07); }
+    function playWin() {
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, index) => {
+        setTimeout(() => playTone(freq, 0.18, "triangle", 0.13), index * 80);
+      });
+    }
+
+    function showSnackbar(message) {
+      clearTimeout(snackTimeout);
+      snackbarText.textContent = message;
+      snackbar.style.opacity = "1";
+      snackbar.style.transform = "translateY(0)";
+      snackTimeout = setTimeout(hideSnackbar, 3000);
+    }
+
+    function hideSnackbar() {
+      snackbar.style.opacity = "0";
+      snackbar.style.transform = "translateY(24px)";
+    }
+
+    function switchView(view) {
+      if (view === currentView) return;
+      currentView = view;
+      playClick();
+      const isMonster = view === "monster";
+      viewTrack.classList.toggle("view-monster", isMonster);
+      viewTrack.classList.toggle("view-snack", !isMonster);
+      tabIndicator.style.transform = isMonster ? "translateX(0)" : "translateX(100%)";
+      tabIndicator.style.backgroundColor = isMonster ? "#a4f59c" : "#ffc88a";
+      tabMonster.classList.toggle("tab-active-monster", isMonster);
+      tabMonster.classList.toggle("text-gray-500", !isMonster);
+      tabSnack.classList.toggle("tab-active-snack", !isMonster);
+      tabSnack.classList.toggle("text-gray-500", isMonster);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setActiveChip(prefix, active, values) {
+      values.forEach((value) => {
+        const button = $(`${prefix}${value}`);
+        const selected = value === active;
+        button.classList.toggle("active", selected);
+        button.classList.toggle("bg-[#1a1b23]", !selected);
+        button.classList.toggle("border-gray-700", !selected);
+        button.classList.toggle("text-gray-300", !selected);
+      });
+    }
 
     function toggleFilter(filterType) {
       if (isRolling) return;
       activeFilter = filterType;
-      
-      ['all', 'zero', 'fruity'].forEach(type => {
-        const btn = document.getElementById(`filter-${type}`);
-        if (type === filterType) {
-          btn.classList.add('active', 'bg-[#314b32]', 'text-[#a4f59c]', 'border-[#a4f59c]');
-          btn.classList.remove('bg-[#1a1b23]', 'text-gray-300', 'border-gray-700');
-        } else {
-          btn.classList.remove('active', 'bg-[#314b32]', 'text-[#a4f59c]', 'border-[#a4f59c]');
-          btn.classList.add('bg-[#1a1b23]', 'text-gray-300', 'border-gray-700');
-        }
-      });
+      playClick();
+      setActiveChip("filter-", filterType, ["all", "zero", "fruity"]);
+      const messages = {
+        all: "전체 제품 목록에서 추천합니다.",
+        zero: "제로 슈거 제품 중에서 추천합니다.",
+        fruity: "과일향 라인업에서 추천합니다."
+      };
+      showSnackbar(messages[filterType]);
+    }
 
-      let msg = "전체 제품 목록에서 추천합니다.";
-      if (filterType === 'zero') msg = "제로 슈거 제품 중에서 추천합니다.";
-      if (filterType === 'fruity') msg = "상큼/과즙 라인업에서 추천합니다.";
-      showSnackbar(msg);
+    function toggleSnackFilter(filterType) {
+      if (isSnackRolling) return;
+      activeSnackFilter = filterType;
+      playClick();
+      setActiveChip("sfilter-", filterType, ["all", "salty", "sweet"]);
+      const messages = {
+        all: "전체 과자 목록에서 추천합니다.",
+        salty: "짭짤한 과자 중에서 추천합니다.",
+        sweet: "달콤한 과자 중에서 추천합니다."
+      };
+      showSnackbar(messages[filterType]);
     }
 
     function getFilteredList() {
-      if (activeFilter === 'zero') return db.filter(item => item.isZero);
-      if (activeFilter === 'fruity') return db.filter(item => item.isFruity);
+      if (activeFilter === "zero") return db.filter((item) => item.isZero);
+      if (activeFilter === "fruity") return db.filter((item) => item.isFruity);
       return db;
     }
 
-    // 파티클 폭죽 효과 생성기
-    function spawnParticles(color) {
-      const particleCount = 15;
-      for (let i = 0; i < particleCount; i++) {
-        const p = document.createElement('div');
-        p.className = 'particle';
-        
-        // 머티리얼 유 컬러 혹은 선정된 몬스터 컬러
-        p.style.backgroundColor = color;
-        
-        // 크기 랜덤
+    function getFilteredSnacks() {
+      if (activeSnackFilter === "salty") return snackDb.filter((item) => item.isSalty);
+      if (activeSnackFilter === "sweet") return snackDb.filter((item) => item.isSweet);
+      return snackDb;
+    }
+
+    function spawnParticles(container, color) {
+      for (let i = 0; i < 15; i += 1) {
+        const particle = document.createElement("span");
         const size = Math.random() * 8 + 4;
-        p.style.width = `${size}px`;
-        p.style.height = `${size}px`;
-        
-        // 룰렛 중앙 위치에 생성
-        p.style.left = '50%';
-        p.style.top = '50%';
-        
-        // 무작위 퍼짐 각도 및 도달 거리 계산
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 100 + 60;
-        const tx = Math.cos(angle) * distance;
-        const ty = Math.sin(angle) * distance;
-        
-        p.style.setProperty('--tx', `${tx}px`);
-        p.style.setProperty('--ty', `${ty}px`);
-        
-        wheelContainer.appendChild(p);
-        
-        // 800ms 애니메이션 종료 후 확실히 소멸
-        setTimeout(() => p.remove(), 800);
+        particle.className = "particle";
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.backgroundColor = color;
+        particle.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty("--ty", `${Math.sin(angle) * distance}px`);
+        container.appendChild(particle);
+        setTimeout(() => particle.remove(), 760);
       }
     }
 
-    // 데이터 화면에 반영 & 탄성 애니메이션 트리거
-    function applyResult(item, runConfetti = false) {
-      // 바운스 효과 제거 후 리셋 트리거
-      displayEmoji.classList.remove('spring-pop');
-      void displayEmoji.offsetWidth; // 리플로우 강제 트리거
-      displayEmoji.classList.add('spring-pop');
+    function pop(element) {
+      element.classList.remove("spring-pop");
+      void element.offsetWidth;
+      element.classList.add("spring-pop");
+      element.style.transform = "";
+    }
 
+    function showResultBox(element) {
+      element.classList.remove("hidden", "opacity-0", "slide-up-fade");
+      void element.offsetWidth;
+      element.classList.add("slide-up-fade");
+    }
+
+    function applyResult(item, runConfetti = false) {
+      pop(displayEmoji);
       displayEmoji.textContent = item.emoji;
       displayName.textContent = item.name;
       displayName.style.color = item.color;
       displaySub.textContent = item.tag;
       dynamicRadial.style.background = `radial-gradient(circle, ${item.color} 0%, transparent 75%)`;
       dynamicRadial.style.opacity = "0.3";
-
       resTag.textContent = item.tag;
       resTag.style.backgroundColor = `${item.color}22`;
       resTag.style.color = item.color;
       resCalories.textContent = item.calories;
       resDesc.textContent = item.desc;
 
-      const fallbackTarget = db.find(d => d.id === item.backupId) || db[0];
-      backupEmoji.textContent = fallbackTarget.emoji;
-      backupName.textContent = fallbackTarget.name;
-      backupTag.textContent = `'${fallbackTarget.tag}' 맛과 가장 흡사해요`;
-      
-      backupItem.onclick = () => {
-        applyResult(fallbackTarget, true);
-        showSnackbar(`대체 추천 제품 정보로 전환되었습니다.`);
+      const snack = snackDb.find((candidate) => candidate.id === item.snackId) || snackDb[0];
+      pairEmoji.textContent = snack.emoji;
+      pairName.textContent = snack.name;
+      pairReason.textContent = `${snack.taste} · 누르면 과자 메뉴로 이동`;
+      pairSnack.onclick = () => {
+        switchView("snack");
+        setTimeout(() => applySnackResult(snack, true), 420);
       };
 
-      // 결과 영역 표시 및 슬라이드업 애니메이션 실행
-      resultContainer.classList.remove('hidden');
-      resultContainer.classList.remove('slide-up-fade');
-      void resultContainer.offsetWidth;
-      resultContainer.classList.add('slide-up-fade');
+      const backup = db.find((candidate) => candidate.id === item.backupId) || db[0];
+      backupEmoji.textContent = backup.emoji;
+      backupName.textContent = backup.name;
+      backupTag.textContent = `${backup.tag} 맛과 가까워요`;
+      backupItem.onclick = () => {
+        applyResult(backup, true);
+        showSnackbar("대체 추천 제품으로 전환되었습니다.");
+      };
 
-      if (runConfetti) {
-        spawnParticles(item.color);
-      }
+      showResultBox(resultContainer);
+      if (runConfetti) spawnParticles(wheelContainer, item.color);
     }
 
-    // 물리 기반 감속(Ease-Out) 룰렛 구현
-    function runPhysicsRoulette(pool) {
-      isRolling = true;
-      resultContainer.classList.add('hidden');
-      
-      // 데코링 가속 회전
-      decoRing.classList.remove('ring-spin-slow');
-      decoRing.classList.add('ring-spin-fast');
+    function applySnackResult(item, runConfetti = false) {
+      pop(sEmoji);
+      sEmoji.textContent = item.emoji;
+      sName.textContent = item.name;
+      sName.style.color = item.color;
+      sSub.textContent = item.taste;
+      snackRadial.style.background = `radial-gradient(circle, ${item.color} 0%, transparent 75%)`;
+      snackRadial.style.opacity = "0.3";
+      sResTag.textContent = item.taste;
+      sResTag.style.backgroundColor = `${item.color}22`;
+      sResTag.style.color = item.color;
+      sResCal.textContent = item.calories;
+      sResDesc.textContent = item.desc;
 
-      pickBtn.disabled = true;
-      pickBtn.style.opacity = '0.6';
-      pickBtn.querySelector('span').textContent = '캔 고르는 중...';
-      pickBtn.querySelector('.material-icons-round').textContent = 'hourglass_empty';
+      const monster = db.find((candidate) => candidate.id === item.monsterId) || db[0];
+      snackPairEmoji.textContent = monster.emoji;
+      snackPairName.textContent = monster.name;
+      snackPairTag.textContent = `${monster.tag} · 누르면 몬스터 메뉴로 이동`;
+      snackPairMonster.onclick = () => {
+        switchView("monster");
+        setTimeout(() => applyResult(monster, true), 420);
+      };
 
-      let currentDelay = 40; // 시작 딜레이 (매우 빠르게 셔플)
-      const maxDelay = 450;  // 멈추기 직전 최대 딜레이 (느려짐의 한계선)
-      const multiplier = 1.15; // 딜레이 증가율 (클수록 마찰력이 강함)
+      showResultBox(snackResult);
+      if (runConfetti) spawnParticles(snackWheel, item.color);
+    }
+
+    function runRoulette(pool, config) {
+      config.setRolling(true);
+      config.result.classList.add("hidden");
+      config.ring.classList.remove("ring-spin-slow");
+      config.ring.classList.add("ring-spin-fast");
+      config.button.disabled = true;
+      config.button.style.opacity = "0.6";
+      config.button.querySelector("span:last-child").textContent = config.loadingText;
+      config.button.querySelector(".material-icons-round").textContent = "hourglass_empty";
+
+      let delay = 40;
+      const maxDelay = 450;
+      const multiplier = 1.15;
 
       function step() {
-        const randomItem = pool[Math.floor(Math.random() * pool.length)];
-        
-        displayEmoji.textContent = randomItem.emoji;
-        displayName.textContent = randomItem.name;
-        displayName.style.color = randomItem.color;
-        displaySub.textContent = "에너지 추출 중...";
+        const current = pool[Math.floor(Math.random() * pool.length)];
+        config.preview(current);
+        playTick();
 
-        // 고속 회전 시 미세 진동 효과
-        displayEmoji.style.transform = `scale(${1 + Math.random() * 0.15}) rotate(${Math.random() * 16 - 8}deg)`;
-
-        if (currentDelay < maxDelay) {
-          // 마찰에 의해 회전 주기가 점진적으로 길어짐 (물리 감속)
-          currentDelay *= multiplier;
-          setTimeout(step, currentDelay);
-        } else {
-          // 감속 완료 및 최종 확정
-          const finalResult = pool[Math.floor(Math.random() * pool.length)];
-          
-          // 링 속도 원래대로
-          decoRing.classList.remove('ring-spin-fast');
-          decoRing.classList.add('ring-spin-slow');
-
-          // 결과 화면 렌더링 및 폭죽 이펙트
-          applyResult(finalResult, true);
-
-          // 버튼 제어 복구
-          pickBtn.disabled = false;
-          pickBtn.style.opacity = '1';
-          pickBtn.querySelector('span').textContent = '무작위 뽑기';
-          pickBtn.querySelector('.material-icons-round').textContent = 'casino';
-          isRolling = false;
-
-          showSnackbar(`최적의 몬스터 결정: ${finalResult.name}`);
+        if (delay < maxDelay) {
+          delay *= multiplier;
+          setTimeout(step, delay);
+          return;
         }
+
+        const final = pool[Math.floor(Math.random() * pool.length)];
+        config.ring.classList.remove("ring-spin-fast");
+        config.ring.classList.add("ring-spin-slow");
+        config.apply(final, true);
+        playWin();
+        config.button.disabled = false;
+        config.button.style.opacity = "1";
+        config.button.querySelector("span:last-child").textContent = config.defaultText;
+        config.button.querySelector(".material-icons-round").textContent = "casino";
+        config.setRolling(false);
+        showSnackbar(config.doneText(final));
       }
 
-      // 회전 프로세스 가동
-      setTimeout(step, currentDelay);
+      setTimeout(step, delay);
     }
 
-    pickBtn.addEventListener('click', () => {
-      if (isRolling) return;
-      
-      const pool = getFilteredList();
-      if (pool.length === 0) {
-        showSnackbar("해당 필터에 만족하는 제품이 없습니다.");
-        return;
-      }
-
-      runPhysicsRoulette(pool);
-    });
-
     function renderAllItems() {
-      itemGridList.innerHTML = '';
-      db.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'bg-[#121318] p-3 rounded-xl border border-gray-800 flex items-center justify-between hover:border-gray-600 transition-all duration-300 cursor-pointer active:scale-[0.98]';
+      itemGridList.innerHTML = "";
+      db.forEach((item) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "flex items-center justify-between rounded-xl border border-gray-800 bg-[#121318] p-3 text-left transition hover:border-gray-600 active:scale-[0.98]";
+        card.innerHTML = `
+          <span class="flex items-center gap-3">
+            <span class="text-xl">${item.emoji}</span>
+            <span>
+              <span class="block text-xs font-bold text-white">${item.name}</span>
+              <span class="mt-0.5 block text-[10px] text-gray-400">${item.tag}</span>
+            </span>
+          </span>
+          <span class="rounded-md bg-[#1a1b23] px-2 py-1 text-[10px] text-gray-500">${item.calories}</span>`;
         card.onclick = () => {
           if (isRolling) return;
+          playClick();
           applyResult(item, true);
-          window.scrollTo({ top: 100, behavior: 'smooth' });
+          window.scrollTo({ top: 100, behavior: "smooth" });
         };
-
-        card.innerHTML = `
-          <div class="flex items-center space-x-3">
-            <span class="text-xl">${item.emoji}</span>
-            <div>
-              <p class="text-xs font-bold text-white">${item.name}</p>
-              <p class="text-[10px] text-gray-400 mt-0.5">${item.tag}</p>
-            </div>
-          </div>
-          <span class="text-[10px] text-gray-500 bg-[#1a1b23] px-2 py-1 rounded-md">${item.calories}</span>
-        `;
         itemGridList.appendChild(card);
       });
     }
 
-    collapseTrigger.addEventListener('click', () => {
-      listOpen = !listOpen;
-      if (listOpen) {
-        listContainer.style.maxHeight = '420px';
-        collapseArrow.style.transform = 'rotate(180deg)';
-      } else {
-        listContainer.style.maxHeight = '0px';
-        collapseArrow.style.transform = 'rotate(0deg)';
-      }
+    function renderAllSnacks() {
+      snackGridList.innerHTML = "";
+      snackDb.forEach((item) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "flex items-center justify-between rounded-xl border border-gray-800 bg-[#121318] p-3 text-left transition hover:border-gray-600 active:scale-[0.98]";
+        card.innerHTML = `
+          <span class="flex items-center gap-3">
+            <span class="text-xl">${item.emoji}</span>
+            <span>
+              <span class="block text-xs font-bold text-white">${item.name}</span>
+              <span class="mt-0.5 block text-[10px] text-gray-400">${item.taste}</span>
+            </span>
+          </span>
+          <span class="rounded-md bg-[#1a1b23] px-2 py-1 text-[10px] text-gray-500">${item.calories}</span>`;
+        card.onclick = () => {
+          if (isSnackRolling) return;
+          playClick();
+          applySnackResult(item, true);
+          window.scrollTo({ top: 100, behavior: "smooth" });
+        };
+        snackGridList.appendChild(card);
+      });
+    }
+
+    $("sound-toggle").addEventListener("click", () => {
+      soundOn = !soundOn;
+      $("sound-icon").textContent = soundOn ? "volume_up" : "volume_off";
+      if (soundOn) playClick();
+      showSnackbar(soundOn ? "효과음을 켰습니다." : "효과음을 껐습니다.");
     });
 
-    let snackTimeout;
-    function showSnackbar(msg) {
-      clearTimeout(snackTimeout);
-      snackbarText.textContent = msg;
-      snackbar.style.opacity = '1';
-      snackbar.style.transform = 'translateY(0)';
+    document.querySelectorAll("[data-filter]").forEach((button) => {
+      button.addEventListener("click", () => toggleFilter(button.dataset.filter));
+    });
 
-      snackTimeout = setTimeout(() => {
-        hideSnackbar();
-      }, 3000);
-    }
+    document.querySelectorAll("[data-snack-filter]").forEach((button) => {
+      button.addEventListener("click", () => toggleSnackFilter(button.dataset.snackFilter));
+    });
 
-    function hideSnackbar() {
-      snackbar.style.opacity = '0';
-      snackbar.style.transform = 'translateY(24px)';
-    }
+    pickBtn.addEventListener("click", () => {
+      if (isRolling) return;
+      const pool = getFilteredList();
+      if (!pool.length) {
+        showSnackbar("해당 필터에 맞는 제품이 없습니다.");
+        return;
+      }
+      runRoulette(pool, {
+        button: pickBtn,
+        ring: decoRing,
+        result: resultContainer,
+        defaultText: "RoLL It!",
+        loadingText: "캔 고르는 중...",
+        setRolling: (value) => { isRolling = value; },
+        preview: (item) => {
+          displayEmoji.textContent = item.emoji;
+          displayName.textContent = item.name;
+          displayName.style.color = item.color;
+          displaySub.textContent = "에너지 추출 중...";
+          displayEmoji.style.transform = `scale(${1 + Math.random() * 0.15}) rotate(${Math.random() * 16 - 8}deg)`;
+        },
+        apply: applyResult,
+        doneText: (item) => `오늘의 몬스터: ${item.name}`
+      });
+    });
+
+    snackPickBtn.addEventListener("click", () => {
+      if (isSnackRolling) return;
+      const pool = getFilteredSnacks();
+      if (!pool.length) {
+        showSnackbar("해당 필터에 맞는 과자가 없습니다.");
+        return;
+      }
+      runRoulette(pool, {
+        button: snackPickBtn,
+        ring: snackDecoRing,
+        result: snackResult,
+        defaultText: "과자 뽑기!",
+        loadingText: "과자 고르는 중...",
+        setRolling: (value) => { isSnackRolling = value; },
+        preview: (item) => {
+          sEmoji.textContent = item.emoji;
+          sName.textContent = item.name;
+          sName.style.color = item.color;
+          sSub.textContent = "봉지 여는 중...";
+          sEmoji.style.transform = `scale(${1 + Math.random() * 0.15}) rotate(${Math.random() * 16 - 8}deg)`;
+        },
+        apply: applySnackResult,
+        doneText: (item) => `오늘의 과자: ${item.name}`
+      });
+    });
+
+    collapseTrigger.addEventListener("click", () => {
+      listOpen = !listOpen;
+      playClick();
+      listContainer.style.maxHeight = listOpen ? "420px" : "0";
+      collapseArrow.style.transform = listOpen ? "rotate(180deg)" : "rotate(0)";
+    });
+
+    snackCollapseTrigger.addEventListener("click", () => {
+      snackListOpen = !snackListOpen;
+      playClick();
+      snackListContainer.style.maxHeight = snackListOpen ? "420px" : "0";
+      snackCollapseArrow.style.transform = snackListOpen ? "rotate(180deg)" : "rotate(0)";
+    });
+
+    tabMonster.addEventListener("click", () => switchView("monster"));
+    tabSnack.addEventListener("click", () => switchView("snack"));
+    $("snackbar-close").addEventListener("click", hideSnackbar);
+
+    countSpan.textContent = db.length;
+    snackCountSpan.textContent = snackDb.length;
+    renderAllItems();
+    renderAllSnacks();
   </script>
 </body>
 </html>
